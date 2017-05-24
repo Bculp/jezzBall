@@ -8,9 +8,12 @@ let blockCoordThatStartedWall = [];
 let blockAbove, blockBelow;
 let firstCall = true;
 let firstTimeCreateWallCalled = true;
+let ballYPositive = true;
+let ballXPositive = true;
+let ballX = 50;
+let ballY = 98;
 
 function createWall(target) {
-  // console.log(target)
   createWallCalled = true;
   let classes = target.classList;
   let x = Number(classes[0]);
@@ -19,7 +22,6 @@ function createWall(target) {
   blockCoordThatStartedWall.push(x,y);
   blockAbove = blockCoordThatStartedWall[1] - 1;
   blockBelow = blockCoordThatStartedWall[1] + 1;
-  // this is 101 should be far less
   firstTimeCreateWallCalled = true;
   otherTargets = Array.from(document.getElementsByClassName(x));
   target.setAttribute('fill', 'black');
@@ -49,10 +51,7 @@ for (let y = 0, y_index = 0; y < svgHeight; y += 25, y_index += 1) {
     svg.appendChild(rect);
   }
 }
-let ballYPositive = true;
-let ballXPositive = true;
-let ballX = 50;
-let ballY = 98;
+
 
 function createBall(cx, cy) {
   ball = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -66,12 +65,48 @@ function createBall(cx, cy) {
 
 function checkCollision() {
   if (ball) {
-    // Added cushioning of 5 for visual appeal
+    //-- Exterior wall collision detection --//
+      // Added cushioning of 5 for visual appeal
     if (Number(ball.cy.baseVal.value) >= svgHeight - 5) ballYPositive = false;
     if (Number(ball.cy.baseVal.value) <= 5) ballYPositive = true;
     if (Number(ball.cx.baseVal.value) >= svgWidth - 5) ballXPositive = false;
     if (Number(ball.cx.baseVal.value) <= 5) ballXPositive = true;
+    //-- Interior wall collision detection --//
+    // let walls = document.querySelectorAll('.wall');
+    // console.log(walls)
+    check()
   }
+}
+
+let validInteriorWalls = [];
+let boxesWithWallClass = [];
+
+function check() {
+  let walls = Array.from(document.querySelectorAll('.wall'));
+  // walls.map(box => {
+  //   let classes = box.className.baseVal.split(" ");
+  //   boxesWithWallClass.push({x: classes[0], y: classes[1]});
+  // })
+  walls.forEach(wall => {
+    let directionToBounceBack = getBoundCheckIntersection(ball, wall)
+    console.log('we hit wall:', directionToBounceBack);
+  })
+}
+
+function getBoundCheckIntersection(item1, item2) {
+  let item1Rect = item1.getBoundingClientRect();    //BOUNDING BOX OF THE FIRST OBJECT
+  let item2Rect = item2.getBoundingClientRect();    //BOUNDING BOX OF THE SECOND OBJECT
+
+   //CHECK IF THE TWO BOUNDING BOXES OVERLAP
+  //  if (item2Rect.left > item1Rect.right) return ballXPositive = true;
+  //  if (item2Rect.right < item1Rect.left) return ballXPositive = false;
+
+  // ** -- PROBLEM IS WITH COLLLISION DETECTION FOR POP UP WALLS. SINCE BALL COULD
+  //       BE ON EITHER SIDE OF WALL, NOT AS CUT AND DRY AS JUST CHECKING COORDS -- ** //
+ return !(item2Rect.left > item1Rect.right ||
+          item2Rect.right < item1Rect.left ||
+          item2Rect.top > item1Rect.bottom ||
+          item2Rect.bottom < item1Rect.top);
 }
 
 
@@ -150,10 +185,10 @@ function draw() {
   // Draw the state of the world
   if (firstCall) {
     firstCall = false;
-    // createBall(ballX, ballY);
+    createBall(ballX, ballY);
   } else {
-    // svg.removeChild(ball);
-    // createBall(ballX, ballY);
+    svg.removeChild(ball);
+    createBall(ballX, ballY);
   }
 }
 
