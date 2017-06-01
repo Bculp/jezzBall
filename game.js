@@ -89,24 +89,29 @@ function check() {
   // })
   walls.forEach(wall => {
     let directionToBounceBack = getBoundCheckIntersection(ball, wall)
-    console.log('we hit wall:', directionToBounceBack);
   })
 }
 
-function getBoundCheckIntersection(item1, item2) {
-  let item1Rect = item1.getBoundingClientRect();    //BOUNDING BOX OF THE FIRST OBJECT
-  let item2Rect = item2.getBoundingClientRect();    //BOUNDING BOX OF THE SECOND OBJECT
+function getBoundCheckIntersection(ball, wall) {
+  let ballRect = ball.getBoundingClientRect();    //BOUNDING BOX OF THE BALL
+  let wallRect = wall.getBoundingClientRect();    //BOUNDING BOX OF THE WALL
 
    //CHECK IF THE TWO BOUNDING BOXES OVERLAP
-  //  if (item2Rect.left > item1Rect.right) return ballXPositive = true;
-  //  if (item2Rect.right < item1Rect.left) return ballXPositive = false;
-
-  // ** -- PROBLEM IS WITH COLLLISION DETECTION FOR POP UP WALLS. SINCE BALL COULD
-  //       BE ON EITHER SIDE OF WALL, NOT AS CUT AND DRY AS JUST CHECKING COORDS -- ** //
- return !(item2Rect.left > item1Rect.right ||
-          item2Rect.right < item1Rect.left ||
-          item2Rect.top > item1Rect.bottom ||
-          item2Rect.bottom < item1Rect.top);
+    // Check if the ball is to the right of the wall
+    if (wallRect.right < ballRect.left) {
+      // If the ball hits the wall on its left it will bounce off it and go towards the right
+      // I have -= 3 because the coordinates are 3 units off for some reason
+      if (wallRect.right >= (ballRect.left -= 3)) {
+        return ballXPositive = true;
+      }
+    }
+    // Check if the ball is to the left of the wall
+    else if (wallRect.left > ballRect.right) {
+      // If the ball hits the wall on its right it will bounce off it and go towards the left
+      if (wallRect.left === (ballRect.right += 3)) {
+        return ballXPositive = false;
+      }
+    }
 }
 
 
